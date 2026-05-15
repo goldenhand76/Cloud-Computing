@@ -1,0 +1,48 @@
+services:
+
+  auth:
+    build: 
+      context: ./auth
+    ports: 
+      - "8080:8080"
+    depends_on:
+      - postgres
+    command: ["/app/main"]
+
+  postgres:
+    image: postgres:13.13-bullseye
+    container_name: postgresql
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_db:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  activemq:
+    image: webcenter/activemq
+    container_name: activemq
+    ports:
+      - 61616:61616
+
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: 'mysql'
+      MYSQL_PASSWORD: '12345678'
+      MYSQL_ROOT_PASSWORD: '12345678'
+    volumes:
+      - mysql_db:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+  postgres_db:
+  mysql_db:
