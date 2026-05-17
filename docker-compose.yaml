@@ -4,10 +4,46 @@ services:
     build: 
       context: ./auth
     ports: 
+      - "8082:8082"
+      - "50051:50051"
+    depends_on:
+      - mysql
+    command: ["/app/main"]
+
+  core:
+    build:
+      context: ./core
+      dockerfile: Dockerfile
+    container_name: core
+    environment:
+      # Database configuration
+      PROJECT_DATASOURCE_JDBC_URL: jdbc:postgresql://postgresql:5432/core
+      PROJECT_DATASOURCE_USERNAME: postgres
+      PROJECT_DATASOURCE_PASS: postgres
+      
+      # ActiveMQ configuration
+      ACTIVEMQ_URL: tcp://activemq:61616
+      ACTIVEMQ_USERNAME: root
+      ACTIVEMQ_PASSWORD: root
+      
+      # JVM options
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+      
+      # Application specific properties
+      APP_PORT: 8080
+      LOGGING_LEVEL_COM_FUM_CLOUD: DEBUG
+      
+      # Optional: External services (update with your actual URLs)
+      AUTH_SERVICE_URL: http://auth:50051
+      
+      # JWT Secret (should be overridden in production)
+      JWT_SECRET_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXIxIiwiZXhwIjoxNTQ3OTc0MDgyfQ.2Ye5_w1z3zpD4dSGdRp3s98ZipCNQqmsHRB9vioOx54
+    ports:
       - "8080:8080"
     depends_on:
       - postgres
-    command: ["/app/main"]
+      - activemq
+    restart: unless-stopped
 
   postgres:
     image: postgres:13.13-bullseye
@@ -15,9 +51,9 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=core
     volumes:
       - postgres_db:/var/lib/postgresql/data
     restart: unless-stopped
