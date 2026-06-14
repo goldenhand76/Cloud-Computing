@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-config
+  namespace: core
+data:
+  AUTH_GRPC_ADDRESS: auth-clusterip-srv.auth.svc.cluster.local
+  AUTH_GRPC_PORT: "50051"
+  PROJECT_DATASOURCE_JDBC_URL: jdbc:postgresql://postgresql-clusterip-srv:5432/core
+  ACTIVEMQ_URL: tcp://activemq-clusterip-srv.mq.svc.cluster.local:61616
+  AUTH_SERVICE_URL: auth-clusterip-srv.auth.svc.cluster.local:50051

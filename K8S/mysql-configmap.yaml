@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+  namespace: auth
+data:
+  init-auth.sql: |
+    CREATE DATABASE IF NOT EXISTS auth;

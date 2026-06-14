@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: activemq-depl
+  namespace: mq
+  labels:
+    app: activemq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: activemq
+  template:
+    metadata:
+      labels:
+        app: activemq
+    spec:
+      containers:
+      - name: activemq
+        image: webcenter/activemq
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 61616
+          name: openwire
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: activemq-clusterip-srv
+  namespace: mq
+spec:
+  type: ClusterIP
+  selector:
+    app: activemq
+  ports:
+  - name: activemq
+    protocol: TCP
+    port: 61616
+    targetPort: 61616
+

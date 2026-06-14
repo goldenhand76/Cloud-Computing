@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-depl
+  namespace: auth
+  labels:
+    app: auth-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-backend
+  template:
+    metadata:
+      labels:
+        app: auth-backend
+    spec:
+      nodeSelector:
+        workload: auth
+      containers:
+      - name: auth-backend
+        image: goldenhand/cloud-computing-auth:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 8082
+        - containerPort: 50051
+        envFrom:
+        - configMapRef:
+            name: auth-config
+        - secretRef:
+            name: auth-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-clusterip-srv
+  namespace: auth 
+  labels:
+    app: auth-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: auth-backend
+  ports:
+    - name: http
+      port: 8082
+      targetPort: 8082
+    - name: grpc
+      port: 50051
+      targetPort: 50051
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-loadbalancer
+  namespace: auth
+spec:
+  type: LoadBalancer
+  selector:
+    app: auth-backend
+  ports:
+  - protocol: TCP
+    port: 8082
+    targetPort: 8082
