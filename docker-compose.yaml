@@ -92,6 +92,18 @@ services:
     networks:
       - mq-network
 
+  users:
+    build:
+      context: ./users
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mysql
+    command: [ "/app/main" ]
+    networks:
+      - auth-network
+
 volumes:
   postgres_db:
   mysql_db:
