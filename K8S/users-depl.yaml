@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-depl
+  namespace: auth
+  labels:
+    app: users-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-backend
+  template:
+    metadata:
+      labels:
+        app: users-backend
+    spec:
+      nodeSelector:
+        workload: auth
+      containers:
+      - name: users-backend
+        image: goldenhand/cloud-computing-users:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 8083
+        envFrom:
+        - configMapRef:
+            name: users-config
+        - secretRef:
+            name: users-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-clusterip-srv
+  namespace: auth 
+  labels:
+    app: users-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: users-backend
+  ports:
+    - name: http
+      port: 8083
+      targetPort: 8083
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-loadbalancer
+  namespace: auth
+spec:
+  type: LoadBalancer
+  selector:
+    app: users-backend
+  ports:
+  - protocol: TCP
+    port: 8083
+    targetPort: 8083
