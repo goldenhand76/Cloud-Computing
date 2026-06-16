@@ -27,7 +27,7 @@ func (server *Server) setupRouter() {
 	router := gin.Default()
 
 	router.GET("/auth/users", server.listUsers)
-	router.DELETE("/auth/user", server.deleteUser)
+	router.DELETE("/auth/user/:id", server.deleteUser)
 
 	server.router = router
 }
