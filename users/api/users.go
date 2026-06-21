@@ -10,13 +10,13 @@ import (
 )
 
 type listUsersRequest struct {
-	Limit  int32 `uri:"limit" binding:"omitempty,min=1,max=100"`
-	Offset int32 `uri:"offset" binding:"omitempty,min=1"`
+	Limit  int32 `form:"limit" binding:"omitempty,min=1,max=100"`
+	Offset int32 `form:"page" binding:"omitempty,min=1"`
 }
 
 func (server *Server) listUsers(ctx *gin.Context) {
 	var req listUsersRequest
-	if err := ctx.ShouldBindUri(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
